@@ -27,6 +27,7 @@
     <relativePath>../parent/pom.xml</relativePath>
   </parent>
 
+  <groupId>NAUMEN-GP</groupId>
   <artifactId>pdfbox-tools</artifactId>
 
   <packaging>jar</packaging>
@@ -44,7 +45,7 @@
       <optional>true</optional>
     </dependency>
     <dependency>
-        <groupId>${project.groupId}</groupId>
+        <groupId>org.apache.pdfbox</groupId>
         <artifactId>pdfbox-debugger</artifactId>
         <version>${project.version}</version>
     </dependency>

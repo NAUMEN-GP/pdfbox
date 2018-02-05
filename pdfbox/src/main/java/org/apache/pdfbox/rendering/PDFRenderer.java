@@ -33,6 +33,9 @@ import org.apache.pdfbox.pdmodel.common.PDRectangle;
 public class PDFRenderer
 {
     protected final PDDocument document;
+    private int maxSecondsToRender = Integer.MAX_VALUE;
+    private boolean maxSecondsToRenderExceed;
+
     // TODO keep rendering state such as caches here
 
     /**
@@ -42,6 +45,14 @@ public class PDFRenderer
     public PDFRenderer(PDDocument document)
     {
         this.document = document;
+    }
+
+    public void setMaxSecondsToRender(int maxSecondsToRender) {
+        this.maxSecondsToRender = maxSecondsToRender;
+    }
+
+    public boolean isMaxSecondsToRenderExceed() {
+        return maxSecondsToRenderExceed;
     }
 
     /**
@@ -142,7 +153,10 @@ public class PDFRenderer
         // the end-user may provide a custom PageDrawer
         PageDrawerParameters parameters = new PageDrawerParameters(this, page);
         PageDrawer drawer = createPageDrawer(parameters);
-        drawer.drawPage(g, page.getCropBox());       
+        drawer.setMaxSecondsToRender(maxSecondsToRender);
+        drawer.drawPage(g, page.getCropBox());
+
+        maxSecondsToRenderExceed = drawer.isMaxSecondsToRenderExceed();
         
         g.dispose();
 

@@ -31,6 +31,8 @@ import java.util.Stack;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.pdfbox.contentstream.operator.MissingOperandException;
+import org.apache.pdfbox.contentstream.operator.graphics.BeginInlineImage;
+import org.apache.pdfbox.contentstream.operator.graphics.DrawObject;
 import org.apache.pdfbox.contentstream.operator.state.EmptyGraphicsStackException;
 import org.apache.pdfbox.cos.COSArray;
 import org.apache.pdfbox.cos.COSBase;
@@ -85,11 +87,22 @@ public abstract class PDFStreamEngine
     private boolean isProcessingPage;
     private Matrix initialMatrix;
 
+    private int maxSecondsToRender = Integer.MAX_VALUE;
+    private boolean maxSecondsToRenderExceed;
+
     /**
      * Creates a new PDFStreamEngine.
      */
     protected PDFStreamEngine()
     {
+    }
+
+    public void setMaxSecondsToRender(int maxSecondsToRender) {
+        this.maxSecondsToRender = maxSecondsToRender;
+    }
+
+    public boolean isMaxSecondsToRenderExceed() {
+        return maxSecondsToRenderExceed;
     }
 
     /**
@@ -484,7 +497,8 @@ public abstract class PDFStreamEngine
         List<COSBase> arguments = new ArrayList<COSBase>();
         PDFStreamParser parser = new PDFStreamParser(contentStream);
         Object token = parser.parseNextToken();
-        while (token != null)
+        long begin = System.currentTimeMillis();
+        while (token != null && ((System.currentTimeMillis() - begin) / 1000 < maxSecondsToRender))
         {
             if (token instanceof COSObject)
             {
@@ -501,6 +515,7 @@ public abstract class PDFStreamEngine
             }
             token = parser.parseNextToken();
         }
+        maxSecondsToRenderExceed = token != null;
     }
 
     /**
@@ -835,6 +850,15 @@ public abstract class PDFStreamEngine
             processor.setContext(this);
             try
             {
+                // TODO возможно, стоит если превысили время, то убирать только отрисовку BeginInlineImage и DrawObject, остальное рисовать
+                // так хоть что-то отрисуется, сейчас, скорее всего, если превысили время, то будет пустая картинка
+                /*if (processor instanceof BeginInlineImage) {
+                    processor.process(operator, operands);
+                } else if (processor instanceof DrawObject) {
+                    processor.process(operator, operands);
+                } else {
+                    processor.process(operator, operands);
+                }*/
                 processor.process(operator, operands);
             }
             catch (IOException e)

@@ -40,7 +40,7 @@ public class DefaultResourceCache implements ResourceCache
 {
     private final Map<COSObject, SoftReference<PDFont>> fonts =
             new HashMap<COSObject, SoftReference<PDFont>>();
-    
+
     private final Map<COSObject, SoftReference<PDColorSpace>> colorSpaces =
             new HashMap<COSObject, SoftReference<PDColorSpace>>();
 
