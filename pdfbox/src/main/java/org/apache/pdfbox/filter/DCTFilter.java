@@ -81,17 +81,22 @@ final class DCTFilter extends Filter
             {
                 try
                 {
-                    // I'd like to use ImageReader#readRaster but it is buggy and can't read RGB correctly
                     int height = reader.getHeight(0);
                     int width = reader.getWidth(0);
                     int maxPixels = Integer.valueOf(System.getProperty("PDF.GGEMaxImagePixels", "11000000"));
-                    System.out.println(height);
-                    System.out.println(width);
-                    System.out.println(maxPixels);
-                    if (width * height > maxPixels) {
-                        throw new GGEMaxPixelsExceededException("height: " + height + ", width: " + width + ", maxPixels: " +
-                                maxPixels + ", width*heigth > maxPixels");
+
+                    if (Boolean.valueOf(System.getProperty("PDF.GGEPrintImagePixels", "false"))) {
+                        System.out.println(height);
+                        System.out.println(width);
+                        System.out.println(maxPixels);
                     }
+
+                    if (maxPixels > 0 && width * height > maxPixels) {
+                        throw new GGEMaxPixelsExceededException("height: " + height + ", width: " + width + ", maxPixels: " +
+                                maxPixels + ", width*height > maxPixels", width, height);
+                    }
+
+                    // I'd like to use ImageReader#readRaster but it is buggy and can't read RGB correctly
                     BufferedImage image = reader.read(0);
                     raster = image.getRaster();
                 }
