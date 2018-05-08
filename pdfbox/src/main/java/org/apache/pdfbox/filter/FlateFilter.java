@@ -93,7 +93,9 @@ final class FlateFilter extends Filter
         in.read(buf,0,2);
         int read = in.read(buf); 
         if (read > 0) 
-        { 
+        {
+            int readed = read;
+
             // use nowrap mode to bypass zlib-header and checksum to avoid a DataFormatException
             Inflater inflater = new Inflater(true); 
             inflater.setInput(buf,0,read);
@@ -121,7 +123,12 @@ final class FlateFilter extends Filter
                     }
                 }
                 if (resRead != 0) 
-                { 
+                {
+                    readed += resRead;
+                    int maxPixels = Integer.valueOf(System.getProperty("PDF.GGEMaxImagePixels", "11000000"));
+                    if (maxPixels > 0 && readed > maxPixels) {
+                        throw new GGEMaxPixelsExceededException("FlateFilter", readed, 0);
+                    }
                     out.write(res,0,resRead);
                     dataWritten = true;
                     continue; 
